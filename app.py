@@ -82,11 +82,11 @@ EXAMPLE_POSTS: Dict[str, str] = {
 def main() -> None:
     st.set_page_config(
         page_title="LinkedInPostMaster - AI Post Optimizer",
-        page_icon="🚀",
+        page_icon="",
         layout="wide",
     )
 
-    st.title("🚀 LinkedInPostMaster")
+    st.title("LinkedInPostMaster")
     st.markdown("**KI-gestützte LinkedIn Post-Optimierung mit Model-Evaluation**")
 
     with st.sidebar:
