@@ -87,10 +87,7 @@ def main() -> None:
     )
 
     st.title("🚀 LinkedInPostMaster")
-    st.markdown("*AI-powered LinkedIn Post Optimization based on 74 high-performing posts*")
-    st.markdown(
-        "**Datenbasierte Post-Optimierung mit Performance-Rules aus 74 historischen Posts**"
-    )
+    st.markdown("**KI-gestützte LinkedIn Post-Optimierung mit Model-Evaluation**")
 
     with st.sidebar:
         st.subheader("OpenAI API Konfiguration")
