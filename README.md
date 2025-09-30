@@ -141,17 +141,4 @@ tests/
 - o3-Judge kann nur mit passenden API-Limits verwendet werden.
 - Es werden keine Kostenkontrollen für parallele API-Aufrufe vorgenommen.
 
-## Weiterentwicklungsideen
-
-- ✅ ~~Unit-Tests für Analyse- und Prompt-Logik~~ (implementiert)
-- Integration-Tests für End-to-End-Workflows
-- Konfigurierbare Regeln (z.B. via YAML/JSON im Backend)
-- Persistenzschicht für Nutzer:innenprofile oder gespeicherte Optimierungen
-- Kostenmonitoring bei intensiven LLM-Abfragen
-- CI/CD Pipeline mit automatischen Tests
-
-## Lizenz
-
-Nicht angegeben. Bitte bei Bedarf ergänzen.
-
 
