@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import concurrent.futures
+import json
 import os
-from typing import Dict, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -79,6 +81,121 @@ EXAMPLE_POSTS: Dict[str, str] = {
 }
 
 
+def load_historical_posts() -> list[Dict[str, Any]]:
+    """Load historical posts from posts.json file"""
+    posts_file = Path(__file__).parent / "posts.json"
+    if not posts_file.exists():
+        return []
+    
+    with posts_file.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+        return data.get("items", [])
+
+
+def render_historical_posts_tab() -> None:
+    """Render the historical posts database tab"""
+    st.subheader("📚 Historische Post-Datenbank")
+    st.markdown(
+        "Die Optimierungen basieren auf **74 erfolgreichen LinkedIn Posts** "
+        "mit messbaren Performance-Daten."
+    )
+    
+    posts = load_historical_posts()
+    
+    if not posts:
+        st.warning("Keine historischen Posts gefunden.")
+        return
+    
+    # Calculate total engagement statistics
+    total_reactions = sum(p.get("metrics", {}).get("reactions_total", 0) for p in posts)
+    total_comments = sum(p.get("metrics", {}).get("comments_count", 0) or 0 for p in posts)
+    total_reposts = sum(p.get("metrics", {}).get("reposts_count", 0) or 0 for p in posts)
+    
+    # Display key metrics
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Posts", len(posts))
+    with col2:
+        st.metric("Reactions", f"{total_reactions:,}")
+    with col3:
+        st.metric("Comments", f"{total_comments:,}")
+    with col4:
+        st.metric("Reposts", f"{total_reposts:,}")
+    
+    st.divider()
+    
+    # Sorting and filtering options
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        sort_by = st.selectbox(
+            "Sortieren nach:",
+            ["Reactions (höchste zuerst)", "Reactions (niedrigste zuerst)", "Chronologisch"],
+        )
+    with col2:
+        min_reactions = st.number_input(
+            "Min. Reactions:",
+            min_value=0,
+            max_value=max(p.get("metrics", {}).get("reactions_total", 0) for p in posts),
+            value=0,
+        )
+    
+    # Sort posts
+    sorted_posts = posts.copy()
+    if sort_by == "Reactions (höchste zuerst)":
+        sorted_posts.sort(
+            key=lambda x: x.get("metrics", {}).get("reactions_total", 0),
+            reverse=True,
+        )
+    elif sort_by == "Reactions (niedrigste zuerst)":
+        sorted_posts.sort(
+            key=lambda x: x.get("metrics", {}).get("reactions_total", 0),
+        )
+    
+    # Filter by minimum reactions
+    filtered_posts = [
+        p for p in sorted_posts
+        if p.get("metrics", {}).get("reactions_total", 0) >= min_reactions
+    ]
+    
+    st.markdown(f"**Zeige {len(filtered_posts)} von {len(posts)} Posts**")
+    
+    # Display posts in expandable sections
+    for idx, post in enumerate(filtered_posts, 1):
+        metrics = post.get("metrics", {})
+        reactions = metrics.get("reactions_total", 0)
+        comments = metrics.get("comments_count", 0) or 0
+        reposts = metrics.get("reposts_count", 0) or 0
+        author = post.get("posted_at", "Unbekannt")
+        
+        # Calculate engagement score
+        engagement_score = reactions + (comments * 2) + (reposts * 3)
+        
+        with st.expander(
+            f"**#{idx} | {author}** | 👍 {reactions} | 💬 {comments} | 🔄 {reposts} | Score: {engagement_score}",
+            expanded=idx <= 3,  # First 3 posts expanded by default
+        ):
+            # Post text
+            st.markdown("**Post-Text:**")
+            st.text_area(
+                "Post",
+                value=post.get("text", ""),
+                height=150,
+                key=f"post_{post.get('post_id', idx)}",
+                label_visibility="collapsed",
+            )
+            
+            # Metrics in columns
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("👍 Reactions", reactions)
+            with col2:
+                st.metric("💬 Comments", comments)
+            with col3:
+                st.metric("🔄 Reposts", reposts)
+            with col4:
+                st.metric("📊 Engagement", engagement_score)
+
+
 def main() -> None:
     st.set_page_config(
         page_title="LinkedInPostMaster - AI Post Optimizer",
@@ -88,6 +205,9 @@ def main() -> None:
 
     st.title("LinkedInPostMaster")
     st.markdown("**KI-gestützte LinkedIn Post-Optimierung mit Model-Evaluation**")
+    
+    # Create tabs for navigation
+    tab_optimizer, tab_database = st.tabs(["🚀 Post Optimieren", "📚 Post-Datenbank"])
 
     with st.sidebar:
         st.subheader("OpenAI API Konfiguration")
@@ -134,8 +254,8 @@ def main() -> None:
 
         run_all_models = st.checkbox("Alle Modelle parallel ausführen")
 
-    _, center_col, _ = st.columns([1, 2, 1])
-    with center_col:
+    # Tab 1: Post Optimizer
+    with tab_optimizer:
         st.subheader("📝 Post-Eingabe")
 
         selected_example = st.selectbox(
@@ -158,103 +278,105 @@ def main() -> None:
             disabled=not bool(active_api_key),
         )
 
-    if optimize_triggered:
-        if not user_input.strip():
-            st.warning("⚠️ Bitte geben Sie einen Post-Text ein")
-        elif not active_api_key:
-            st.error("❌ Bitte geben Sie einen gültigen OpenAI API Key ein")
+        if optimize_triggered:
+            if not user_input.strip():
+                st.warning("⚠️ Bitte geben Sie einen Post-Text ein")
+            elif not active_api_key:
+                st.error("❌ Bitte geben Sie einen gültigen OpenAI API Key ein")
+            else:
+                with st.spinner("Analysiere und optimiere..."):
+                    analysis = analyze_post_with_rules(user_input)
+                    prompt = create_optimizer_prompt(user_input, analysis)
+
+                    st.session_state["analysis"] = analysis
+                    st.session_state["prompt"] = prompt
+                    st.session_state["user_input"] = user_input
+
+                    client = get_openai_client(active_api_key)
+
+                    if run_all_models:
+                        st.session_state["all_optimizations"] = run_parallel_optimizations(
+                            client=client,
+                            prompt=prompt,
+                            baseline_score=analysis["total_score"],
+                            temperature=temperature_value,
+                        )
+                        st.session_state.pop("optimization", None)
+                    else:
+                        result = client.optimize_post(
+                            prompt=prompt,
+                            model=selected_model,
+                            baseline_score=analysis["total_score"],
+                            temperature=temperature_value,
+                        )
+                        st.session_state["optimization"] = result
+                        st.session_state.pop("all_optimizations", None)
+
+                    st.session_state.pop("judge_result", None)
+
+        if "analysis" not in st.session_state:
+            st.info("👆 Geben Sie einen Post ein und klicken Sie auf 'Post optimieren' um zu starten.")
         else:
-            with st.spinner("Analysiere und optimiere..."):
-                analysis = analyze_post_with_rules(user_input)
-                prompt = create_optimizer_prompt(user_input, analysis)
+            analysis_state = st.session_state["analysis"]
+            prompt_state = st.session_state.get("prompt", "")
+            user_input_state = st.session_state.get("user_input", "")
 
-                st.session_state["analysis"] = analysis
-                st.session_state["prompt"] = prompt
-                st.session_state["user_input"] = user_input
+            st.divider()
+            st.subheader("📊 Ergebnisse")
 
-                client = get_openai_client(active_api_key)
+            all_results = st.session_state.get("all_optimizations")
+            single_result = st.session_state.get("optimization")
 
-                if run_all_models:
-                    st.session_state["all_optimizations"] = run_parallel_optimizations(
-                        client=client,
-                        prompt=prompt,
-                        baseline_score=analysis["total_score"],
-                        temperature=temperature_value,
+            if all_results:
+                st.write("**✨ Ergebnisse im Vergleich**")
+
+                columns = st.columns(len(all_results))
+                for column, (model_name, result) in zip(columns, all_results.items(), strict=True):
+                    with column:
+                        st.subheader(f"**{model_name}**")
+                        render_optimization_panel(
+                            model_name=model_name,
+                            response=result,
+                            analysis=analysis_state,
+                            prompt=prompt_state,
+                            debug_key_prefix=model_name,
+                        )
+
+                st.divider()
+                st.subheader("🏆 Richter-Urteil (o3)")
+
+                if st.button("🏆 Gewinner ermitteln", type="secondary", use_container_width=True):
+                    if not active_api_key:
+                        st.error("❌ Kein OpenAI API Key verfügbar. Bitte API Key angeben.")
+                    else:
+                        judge_service = JudgeService(api_key=active_api_key)
+                        with st.spinner("o3 bewertet die Posts..."):
+                            judge_result = judge_service.judge(
+                                original_post=user_input_state,
+                                all_optimizations={
+                                    model: response.as_dict() for model, response in all_results.items()
+                                },
+                            )
+                            st.session_state["judge_result"] = judge_result
+
+                if st.session_state.get("judge_result"):
+                    render_judge_result(
+                        st.session_state["judge_result"],
+                        debug_key="judge",
                     )
-                    st.session_state.pop("optimization", None)
-                else:
-                    result = client.optimize_post(
-                        prompt=prompt,
-                        model=selected_model,
-                        baseline_score=analysis["total_score"],
-                        temperature=temperature_value,
-                    )
-                    st.session_state["optimization"] = result
-                    st.session_state.pop("all_optimizations", None)
 
-                st.session_state.pop("judge_result", None)
-
-    if "analysis" not in st.session_state:
-        return
-
-    analysis_state = st.session_state["analysis"]
-    prompt_state = st.session_state.get("prompt", "")
-    user_input_state = st.session_state.get("user_input", "")
-
-    st.divider()
-    st.subheader("📊 Ergebnisse")
-
-    all_results = st.session_state.get("all_optimizations")
-    single_result = st.session_state.get("optimization")
-
-    if all_results:
-        st.write("**✨ Ergebnisse im Vergleich**")
-
-        columns = st.columns(len(all_results))
-        for column, (model_name, result) in zip(columns, all_results.items(), strict=True):
-            with column:
-                st.subheader(f"**{model_name}**")
+            elif single_result:
                 render_optimization_panel(
-                    model_name=model_name,
-                    response=result,
+                    model_name=single_result.model or selected_model,
+                    response=single_result,
                     analysis=analysis_state,
                     prompt=prompt_state,
-                    debug_key_prefix=model_name,
+                    debug_key_prefix="single",
                 )
-
-        st.divider()
-        st.subheader("🏆 Richter-Urteil (o3)")
-
-        if st.button("🏆 Gewinner ermitteln", type="secondary", use_container_width=True):
-            if not active_api_key:
-                st.error("❌ Kein OpenAI API Key verfügbar. Bitte API Key angeben.")
-            else:
-                judge_service = JudgeService(api_key=active_api_key)
-                with st.spinner("o3 bewertet die Posts..."):
-                    judge_result = judge_service.judge(
-                        original_post=user_input_state,
-                        all_optimizations={
-                            model: response.as_dict() for model, response in all_results.items()
-                        },
-                    )
-                    st.session_state["judge_result"] = judge_result
-
-        if st.session_state.get("judge_result"):
-            render_judge_result(
-                st.session_state["judge_result"],
-                debug_key="judge",
-            )
-
-    elif single_result:
-        _, center_col, _ = st.columns([1, 2, 1])
-        with center_col:
-            render_optimization_panel(
-                model_name=single_result.model or selected_model,
-                response=single_result,
-                analysis=analysis_state,
-                prompt=prompt_state,
-                debug_key_prefix="single",
-            )
+    
+    # Tab 2: Historical Posts Database
+    with tab_database:
+        render_historical_posts_tab()
 
 
 if __name__ == "__main__":

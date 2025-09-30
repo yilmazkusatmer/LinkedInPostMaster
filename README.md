@@ -1,4 +1,4 @@
-# 🚀 LinkedInPostMaster
+# LinkedInPostMaster
 
 AI-powered Streamlit application for optimizing LinkedIn posts based on 74 high-performing reference posts with optional o3-judge evaluation.
 
