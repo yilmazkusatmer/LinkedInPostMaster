@@ -8,11 +8,18 @@ from typing import Dict, List
 class PostExample:
     text: str
     reactions: int
+    comments: int
+    reposts: int
     analysis: str
+    
+    @property
+    def engagement_score(self) -> int:
+        """Calculate engagement score: reactions + (comments * 2) + (reposts * 3)"""
+        return self.reactions + (self.comments * 2) + (self.reposts * 3)
 
 
 def build_post_examples() -> Dict[str, List[PostExample]]:
-    """Return curated post examples grouped by performance buckets."""
+    """Return curated post examples grouped by performance buckets based on engagement score."""
 
     high_performers: List[PostExample] = [
         PostExample(
@@ -24,17 +31,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " einer Bevormundungsmentalität. \n\nMehr dazu: https://lnkd.in/dXfbsqnA"
             ),
             reactions=225,
-            analysis="Kontroverse + emotionaler Aufhänger + lokaler Bezug + Überraschung",
-        ),
-        PostExample(
-            text=(
-                "Natur und Kreativität vereint: Das Gartencenter Meier zeigt, wie Werbung und"
-                " Umgebung eine Einheit bilden. Absichtlich überwucherte Plakatstellen dienen"
-                " als kreative Bühne für den Herbstschnitt-Service. Ein einzigartiger Out of"
-                " Home Einsatz, der Aufmerksamkeit weckt, Botschaften verankert und begeistert!"
-            ),
-            reactions=206,
-            analysis="Kreative Überraschung + Natur-Bezug + unerwartete Wendung",
+            comments=1,
+            reposts=35,
+            analysis="Kontroverse + emotionaler Aufhänger + lokaler Bezug + Überraschung + hohe Viral-Rate",
         ),
         PostExample(
             text=(
@@ -61,7 +60,21 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " Brechbühl, Deborah Ackermann, Maria Stalder"
             ),
             reactions=186,
-            analysis="Nostalgie + Schweizer Identität + Emojis + Überraschung + Kult-Faktor + Storytelling",
+            comments=13,
+            reposts=16,
+            analysis="Nostalgie + Schweizer Identität + Emojis + Kult-Faktor + Storytelling + hohe Interaktion",
+        ),
+        PostExample(
+            text=(
+                "Natur und Kreativität vereint: Das Gartencenter Meier zeigt, wie Werbung und"
+                " Umgebung eine Einheit bilden. Absichtlich überwucherte Plakatstellen dienen"
+                " als kreative Bühne für den Herbstschnitt-Service. Ein einzigartiger Out of"
+                " Home Einsatz, der Aufmerksamkeit weckt, Botschaften verankert und begeistert!"
+            ),
+            reactions=206,
+            comments=3,
+            reposts=5,
+            analysis="Kreative Überraschung + Natur-Bezug + unerwartete Wendung",
         ),
         PostExample(
             text=(
@@ -72,7 +85,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " Zürich.\n\nMehr erfahren: https://lnkd.in/dmKjypcn"
             ),
             reactions=164,
-            analysis="Wichtige Neuigkeit + konkrete Zahlen + lokaler Bezug Zürich",
+            comments=4,
+            reposts=14,
+            analysis="Wichtige Neuigkeit + konkrete Zahlen + lokaler Bezug Zürich + hohe Share-Rate",
         ),
         PostExample(
             text=(
@@ -83,6 +98,8 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 "Auf viele weitere Jahre voller Engagement, Teamgeist und gemeinsamer Erfolge!"
             ),
             reactions=145,
+            comments=5,
+            reposts=14,
             analysis="Meilenstein + emotionale Momente + Community-Gefühl + Feier-Atmosphäre",
         ),
         PostExample(
@@ -94,7 +111,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " Werbung im öffentlichen Verkehr erfahren: https://lnkd.in/dfbmnfDH"
             ),
             reactions=144,
-            analysis="Bewegung + geografische Expansion + prominente Sichtbarkeit + Neugier",
+            comments=2,
+            reposts=16,
+            analysis="Bewegung + geografische Expansion + prominente Sichtbarkeit + Neugier + hohe Reichweite",
         ),
         PostExample(
             text=(
@@ -104,38 +123,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " APG|SGA."
             ),
             reactions=136,
+            comments=4,
+            reposts=12,
             analysis="Kultur + Geschichte + Zürich-Bezug + zeitlich begrenzt",
-        ),
-        PostExample(
-            text=(
-                "Ein traditioneller Anlass mit festlicher Stimmung: Köstliche Wiediker-Würste,"
-                " süsse Berliner und heisser Glühwein machten den Abend im Hinterhof der APG|SGA zu"
-                " einem unvergesslichen Auftakt der Out of Home-Saison 2025. Herzlichen Dank an"
-                " alle, die dabei waren – bis zum nächsten Hoffäscht!"
-            ),
-            reactions=129,
-            analysis="Tradition + sinnliche Details + Gemeinschaftsgefühl + Atmosphäre",
-        ),
-        PostExample(
-            text=(
-                "Gemeinsam für das Schweizer Plakat: Plakate sind ein fester Bestandteil des"
-                " öffentlichen Raums und leisten einen wichtigen Beitrag für Gesellschaft,"
-                " Wirtschaft und Politik. Die neu lancierte Allianz «Pro Plakat» setzt sich gegen"
-                " Werbeverbote in Schweizer Städten ein – und für ein lebendiges Stadtbild.\n\n"
-                "Jetzt unterstützen: https://lnkd.in/d89AassB"
-            ),
-            reactions=126,
-            analysis="Gemeinschaftsgefühl + gesellschaftlicher Auftrag + Schweiz-Bezug + CTA",
-        ),
-        PostExample(
-            text=(
-                "Premiere am Flughafen Zürich AG: Mit einer Werbebotschaft auf zwei"
-                " nebeneinanderliegenden MegaPoster sorgt MINI in Zusammenarbeit mit dentsu für"
-                " Aufsehen.\n\nInspiriert? Werben Sie gross – oder sogar doppelt:"
-                " https://lnkd.in/dXVqdUbQ"
-            ),
-            reactions=125,
-            analysis="Premiere + Superlativ + direkter CTA + Wortwitz",
         ),
         PostExample(
             text=(
@@ -147,7 +137,22 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " entdecken: https://lnkd.in/dsv_pW5F\n\n\n📸: zvg"
             ),
             reactions=120,
+            comments=4,
+            reposts=15,
             analysis="Starker Hook + geografische Überraschung + Unternehmen + Innovation",
+        ),
+        PostExample(
+            text=(
+                "Gemeinsam für das Schweizer Plakat: Plakate sind ein fester Bestandteil des"
+                " öffentlichen Raums und leisten einen wichtigen Beitrag für Gesellschaft,"
+                " Wirtschaft und Politik. Die neu lancierte Allianz «Pro Plakat» setzt sich gegen"
+                " Werbeverbote in Schweizer Städten ein – und für ein lebendiges Stadtbild.\n\n"
+                "Jetzt unterstützen: https://lnkd.in/d89AassB"
+            ),
+            reactions=126,
+            comments=0,
+            reposts=13,
+            analysis="Gemeinschaftsgefühl + gesellschaftlicher Auftrag + Schweiz-Bezug + CTA",
         ),
         PostExample(
             text=(
@@ -157,20 +162,37 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " https://lnkd.in/dDq_NpWu"
             ),
             reactions=112,
+            comments=6,
+            reposts=11,
             analysis="Superlativ + konkrete Zahlen + Prestige-Location + Zielgruppen-Fokus",
+        ),
+        PostExample(
+            text=(
+                "Premiere am Flughafen Zürich AG: Mit einer Werbebotschaft auf zwei"
+                " nebeneinanderliegenden MegaPoster sorgt MINI in Zusammenarbeit mit dentsu für"
+                " Aufsehen.\n\nInspiriert? Werben Sie gross – oder sogar doppelt:"
+                " https://lnkd.in/dXVqdUbQ"
+            ),
+            reactions=125,
+            comments=0,
+            reposts=7,
+            analysis="Premiere + Superlativ + direkter CTA + Wortwitz",
+        ),
+        PostExample(
+            text=(
+                "Ein traditioneller Anlass mit festlicher Stimmung: Köstliche Wiediker-Würste,"
+                " süsse Berliner und heisser Glühwein machten den Abend im Hinterhof der APG|SGA zu"
+                " einem unvergesslichen Auftakt der Out of Home-Saison 2025. Herzlichen Dank an"
+                " alle, die dabei waren – bis zum nächsten Hoffäscht!"
+            ),
+            reactions=129,
+            comments=3,
+            reposts=2,
+            analysis="Tradition + sinnliche Details + Gemeinschaftsgefühl + Atmosphäre",
         ),
     ]
 
     medium_performers: List[PostExample] = [
-        PostExample(
-            text=(
-                "APG|SGA stärkt Plakatflächen-Angebot im Kanton Zürich deutlich: Ab 2026"
-                " vermarktet die APG|SGA 672 zusätzliche Flächen an zentralen Verkehrslagen im"
-                " Kanton Zürich.\n\nZur Medienmitteilung: https://lnkd.in/dZfTz8hP"
-            ),
-            reactions=98,
-            analysis="Fakten + konkrete Zahlen + geografischer Bezug, aber wenig Emotion",
-        ),
         PostExample(
             text=(
                 "Out of Home trifft Kunst: MINI (BMW Group) und die WAND AG realisieren gemeinsam"
@@ -179,18 +201,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 "Mehr Einblicke: https://lnkd.in/dH8MwAVm\n\ndentsu"
             ),
             reactions=97,
+            comments=2,
+            reposts=10,
             analysis="Kunst-Bezug + Superlativ + Zürich-Bezug, aber schwacher Hook",
-        ),
-        PostExample(
-            text=(
-                "Erste 3D-Umsetzung von einem Autobrand am Flughafen Zürich AG: Mercedes-Benz"
-                " Switzerland verwandelt ihren Spot in ein eindrückliches Erlebnis und zieht die"
-                " Aufmerksamkeit von einem internationalen Publikum auf sich.\n\nWerben auch Sie"
-                " in diesem einzigartigen Umfeld: https://lnkd.in/dQrBcxhm\n\n\nHashtag\n"
-                "#airportadvertising \nHashtag\n#mercedesbenzswitzerland \nHashtag\n#apgsga"
-            ),
-            reactions=91,
-            analysis="Innovation + Technologie + internationale Reichweite, aber technisch",
         ),
         PostExample(
             text=(
@@ -202,28 +215,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " https://lnkd.in/d4xBd_zd"
             ),
             reactions=89,
+            comments=1,
+            reposts=8,
             analysis="Vielfalt + konkrete Zahlen + Slogan, aber wenig Emotion",
-        ),
-        PostExample(
-            text=(
-                "Die neue Kampagne «Bin kein Baby» der SWISS RETAIL FEDERATION stellt sich mit"
-                " augenzwinkernden Sujets gegen kleinliche Verbote und übergriffige"
-                " Einschränkungen. Die Plakate und Spots sind in der ganzen Schweiz zu sehen und"
-                " sollen Erwachsene zu mehr gesundem Menschenverstand ermuntern.\n\nMehr erfahren:"
-                " www.bin-kein-baby.ch"
-            ),
-            reactions=78,
-            analysis="Kontroverse + Humor + Rebellion, aber zu abstrakt",
-        ),
-        PostExample(
-            text=(
-                "Animation, die Massstäbe setzt: ABB bespielt die AdWalks am Flughafen Zürich AG"
-                " mit einer eindrucksvollen animierten Kampagne über mehrere Screens hinweg. Eine"
-                " aufmerksamkeitsstarke Kampagne in einem hochwertigen Werbeumfeld.\n\nDigitales"
-                " Werbeangebot am Flughafen Zürich entdecken: https://lnkd.in/dt9k3AXG"
-            ),
-            reactions=75,
-            analysis="Technologie + Superlativ + Flughafen-Prestige, aber wenig persönlich",
         ),
         PostExample(
             text=(
@@ -232,17 +226,9 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " Tag sichtbar wird – Schritt für Schritt, Plakat für Plakat."
             ),
             reactions=74,
+            comments=1,
+            reposts=12,
             analysis="Persönliche Geschichte + Behind-the-Scenes, aber zu beruflich",
-        ),
-        PostExample(
-            text=(
-                "Lancôme beeindruckt auf eBoards mit spektakulärer 3D-Umsetzung: Maximale"
-                " Sichtbarkeit, beeindruckende Grösse und ein Wow-Effekt, der ins Auge sticht.\n\n"
-                "Entdecken Sie die beeindruckenden Grossformate, die alle Blicke auf sich ziehen:"
-                " https://lnkd.in/gkyC6EJH"
-            ),
-            reactions=74,
-            analysis="Luxus-Marke + Technologie + Wow-Faktor, aber generische Sprache",
         ),
         PostExample(
             text=(
@@ -252,96 +238,170 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
                 " diese und weitere lokale Erfolgsgeschichten: https://lnkd.in/dWbWG-JH"
             ),
             reactions=72,
+            comments=5,
+            reposts=10,
             analysis="Erfolgsgeschichte + konkrete Zahlen + Überraschung, aber werblich",
+        ),
+        PostExample(
+            text=(
+                "Hochkarätig besetztes Podium am WOOHW!-Event: Nach den inspirierenden Keynotes"
+                " von Ana Campos, Vorstandsmitglied Meta EMEA, und Marius Smytzek, CEO Ströer SE &"
+                " Co. KGaA, diskutierten sie gemeinsam mit weiteren Expert:innen über die Zukunft"
+                " digitaler Out of Home-Werbung und deren Potenzial, Marken emotional zu verbinden"
+                " und nachhaltig sichtbar zu machen."
+            ),
+            reactions=87,
+            comments=0,
+            reposts=7,
+            analysis="Expertenwissen + Event-Atmosphäre, aber zu formal",
+        ),
+        PostExample(
+            text=(
+                "Animation, die Massstäbe setzt: ABB bespielt die AdWalks am Flughafen Zürich AG"
+                " mit einer eindrucksvollen animierten Kampagne über mehrere Screens hinweg. Eine"
+                " aufmerksamkeitsstarke Kampagne in einem hochwertigen Werbeumfeld.\n\nDigitales"
+                " Werbeangebot am Flughafen Zürich entdecken: https://lnkd.in/dt9k3AXG"
+            ),
+            reactions=75,
+            comments=4,
+            reposts=8,
+            analysis="Technologie + Superlativ + Flughafen-Prestige, aber wenig persönlich",
+        ),
+        PostExample(
+            text=(
+                "Erste 3D-Umsetzung von einem Autobrand am Flughafen Zürich AG: Mercedes-Benz"
+                " Switzerland verwandelt ihren Spot in ein eindrückliches Erlebnis und zieht die"
+                " Aufmerksamkeit von einem internationalen Publikum auf sich.\n\nWerben auch Sie"
+                " in diesem einzigartigen Umfeld: https://lnkd.in/dQrBcxhm\n\n\nHashtag\n"
+                "#airportadvertising \nHashtag\n#mercedesbenzswitzerland \nHashtag\n#apgsga"
+            ),
+            reactions=91,
+            comments=1,
+            reposts=3,
+            analysis="Innovation + Technologie + internationale Reichweite, aber technisch",
+        ),
+        PostExample(
+            text=(
+                "Lancôme beeindruckt auf eBoards mit spektakulärer 3D-Umsetzung: Maximale"
+                " Sichtbarkeit, beeindruckende Grösse und ein Wow-Effekt, der ins Auge sticht.\n\n"
+                "Entdecken Sie die beeindruckenden Grossformate, die alle Blicke auf sich ziehen:"
+                " https://lnkd.in/gkyC6EJH"
+            ),
+            reactions=74,
+            comments=1,
+            reposts=8,
+            analysis="Luxus-Marke + Technologie + Wow-Faktor, aber generische Sprache",
+        ),
+        PostExample(
+            text=(
+                "Am Puls der Stadt zur besten Zeit: Zalando zeigt, wie clevere Platzierung die"
+                " perfekte Zielgruppe erreicht – genau dann, wenn sie am aufmerksamsten ist."
+                " Digital City Lights schaffen maximale Sichtbarkeit und Flexibilität für urbane"
+                " Kampagnen.\n\nJetzt entdecken: https://lnkd.in/dHYNiNAC"
+            ),
+            reactions=71,
+            comments=4,
+            reposts=7,
+            analysis="Timing + Zielgruppen-Fokus + urbaner Kontext, aber zu werblich",
         ),
     ]
 
     low_performers: List[PostExample] = [
         PostExample(
             text=(
-                "Airport Premium Network: Ab sofort erreichen Werbetreibende mit nur einer"
-                " Buchung jährlich über 24 Millionen Businessreisende an den Flughäfen München,"
-                " Wien und Zürich.\n\nJetzt von drei attraktiven Paketen profitieren:"
-                " https://lnkd.in/dvsyn789\n\nFlughafen München Flughafen Wien - Vienna"
-                " Airport Flughafen Zürich AG"
+                "Glückwunsch zum fantastischen 3. Platz! 🥉🎉\n\nDie APG|SGA AG ist stolz auf das"
+                " erfolgreiche Abschneiden des Landschaftsprojekts «eBoards – Bildschirme erobern"
+                " Schweizer Bahnhöfe» beim SBB Green Class Award.\n\nUnser Ziel: Ein"
+                " verantwortungsvoller Umgang mit Energie und Ressourcen durch nachhaltige,"
+                " umweltfreundliche Massnahmen in der Aussenwerbung."
             ),
-            reactions=49,
-            analysis="Produktbeschreibung ohne emotionalen Bezug oder Hook",
+            reactions=33,
+            comments=0,
+            reposts=0,
+            analysis="Erfolg erwähnt, aber zu corporate und wenig emotional",
         ),
         PostExample(
             text=(
-                "Insights in eine vielfältige Aussenwerbekampagne: In einem exklusiven Interview"
-                " verrät Branko Nastic von Digitec Galaxus AG, wie die Idee zu ihren 50 Sujets in"
-                " 42 Sprachen entstanden ist und welche Herausforderungen sie dabei gemeistert"
-                " haben.\n\nInspirieren lassen: https://lnkd.in/dUQihk3P"
+                "Natur, Nahrung und Nachhaltigkeit: Die in Zusammenarbeit mit Planted Foods AG"
+                " entstande Kampagne von WIRZ Group setzt Geschmack und Umweltbewusstsein gekonnt"
+                " in Szene. Sichtbar auf digitalen Screens in urbanen Zentren."
             ),
-            reactions=48,
-            analysis="Behind-the-Scenes + Zahlen, aber zu sachlich und wenig fesselnd",
+            reactions=28,
+            comments=0,
+            reposts=1,
+            analysis="Nachhaltigkeitsthema, aber zu allgemein und ohne Hook",
         ),
         PostExample(
             text=(
-                "Startschuss für das OOH-Jahr 2026: Neue Standorte, digitale Angebote und"
-                " attraktive Specials bringen frischen Schub für starke Kampagnen. Buchungen ab"
-                " dem 6. Oktober 2025 möglich – jetzt die Neuigkeiten entdecken:"
-                " https://lnkd.in/dMq6-qTT"
+                "Call for Entries: Reichen Sie Ihre (D)OOH-Kampagne bis zum 31. März 2025 beim"
+                " renommierten ADC Switzerland ein und sichern Sie sich die Chance auf eine"
+                " Auszeichnung in der Kategorie Out of Home.\n\nJetzt einreichen:"
+                " https://lnkd.in/dDRZqx3p"
             ),
-            reactions=44,
-            analysis="Administrative Sprache, generische Begriffe, kein emotionaler Hook",
+            reactions=22,
+            comments=0,
+            reposts=3,
+            analysis="CTA vorhanden, aber rein administrativ ohne emotionale Ansprache",
         ),
         PostExample(
             text=(
-                "UEFA Women's EURO 2025: Während Europa auf die Schweiz blickt, eröffnen sich"
-                " kontaktstarke Möglichkeiten für Werbetreibende: Mit Programmatic DOOH und aymo"
-                " Mobile Targeting stechen Sie aus der Masse heraus – punktgenau, relevant und"
-                " wirkungsvoll.\n\nMehr erfahren: https://lnkd.in/d-4R-R7M"
+                "StarLounge-Plätze im Hallenstadion Zürich zu gewinnen: Auch in diesem Jahr bietet"
+                " die APG|SGA exklusive Werbemöglichkeiten am Hallenstadion Zürich. Nutzen Sie die"
+                " Chance, Ihre Marke in einem hochkarätigen Umfeld zu präsentieren – und nehmen Sie"
+                " an unserem Wettbewerb teil!\n\nMehr erfahren: https://lnkd.in/efiHixVg"
             ),
-            reactions=44,
-            analysis="Großevent + Technologie, aber zu verkaufsorientiert und unpersönlich",
+            reactions=24,
+            comments=0,
+            reposts=2,
+            analysis="Gewinnspiel erwähnt, aber verkaufsorientiert und wenig ansprechend",
         ),
         PostExample(
             text=(
-                "2025 – Das Jahr der Grossanlässe in der Schweiz: Es stehen zahlreiche Events"
-                " bevor – perfekt, um Ihre Botschaft mit kreativen und programmatischen"
-                " Kampagnen direkt ans lokale, regionale oder nationale Publikum zu bringen. \n\n"
-                "Lassen Sie sich inspirieren: https://lnkd.in/dgUVseWb\n\n\nHashtag\n#outofhome"
-                " \nHashtag\n#apgsga \nHashtag\n#markenpräsenz"
+                "✨ ePoster Gallery feiert die Jubiläumsausgabe \n\n🔸 125 Jahre APG|SGA finden"
+                " Raum auf den digitalen Screens der ePoster Gallery. \n🔸 Entdecken Sie die"
+                " Highlights an den Standorten Basel SBB, Bern und Zürich HB. \n🔸 Zu sehen vom 1."
+                " bis 28. Februar 2025.\n\nErfahren Sie mehr: https://lnkd.in/dtDRb5pq"
             ),
-            reactions=42,
-            analysis="Allgemeine Ankündigung ohne konkrete Details oder emotionalen Bezug",
+            reactions=20,
+            comments=0,
+            reposts=1,
+            analysis="Jubiläum erwähnt, aber zu listenorientiert und wenig fesselnd",
         ),
         PostExample(
             text=(
-                "Pendler:innen ohne Streuverlust erreicht: Mit aymo LiveTarget in Gemeinden und"
-                " aymo ReTarget entlang auserwählten Tramlinien spricht Breitband.ch ihre"
-                " Zielgruppe punktgenau an.\nZum Case: https://lnkd.in/gV6FejpQ\n\nZudem neu im"
-                " Portfolio:\nDas Halfpage Ad sorgt mit Grösse und permanenter Sichtbarkeit für"
-                " maximale Aufmerksamkeit.\nJetzt entdecken: https://lnkd.in/g5RmXpyX"
+                "Starke Kampagnen brauchen starke Präsenz. Wir freuen uns, dass MANOR unsere"
+                " Werbeflächen nutzt, um ihre neue «Looks That Last»-Kampagne ins Rampenlicht zu"
+                " rücken. Sichtbar an verschiedenen Standorten in der ganzen Schweiz.\n\nMehr zu"
+                " unseren Angeboten: https://lnkd.in/dkUeNdGa"
             ),
-            reactions=37,
-            analysis="Technische Features ohne emotionalen Bezug oder Geschichte",
+            reactions=19,
+            comments=0,
+            reposts=1,
+            analysis="Kampagnenerwähnung, aber zu werblich und ohne Storytelling",
         ),
         PostExample(
             text=(
-                "Werben mitten im Eventgeschehen: Die kühle Jahreszeit steht vor der Tür – und das"
-                " Hallenstadion Zürich wird zum Hotspot für Top-Events. Sichern Sie sich jetzt"
-                " Ihre Werbepräsenz und erreichen Sie eine vielseitige Zielgruppe in bester"
-                " Stimmung! Bei einem Wettbewerb haben Sie die Chance, StarLounge-Tickets für eine"
-                " Veranstaltung zu gewinnen.\n\nMehr erfahren: https://lnkd.in/efiHixVg\n\n\n"
-                "Hashtag\n#hallenstadionzürich \nHashtag\n#events \nHashtag\n#apgsga"
+                "ADC Switzerland Young Creatives Award 2025 – Kreativer Nachwuchs gesucht!\n\n"
+                "Junge Talente bis 30 Jahre haben die Chance, ihre innovativen Ideen einzureichen"
+                " und in der Kreativbranche Fuss zu fassen. Einsendeschluss: 31. März 2025.\n\n"
+                "Jetzt teilnehmen: https://lnkd.in/dPdDCb5d\n\nADC Switzerland"
             ),
-            reactions=37,
-            analysis="Verkaufsorientiert + generische Sprache + schwacher CTA",
+            reactions=17,
+            comments=0,
+            reposts=1,
+            analysis="Award-Ausschreibung, aber rein informativ ohne emotionalen Bezug",
         ),
         PostExample(
             text=(
-                "Markenpräsenz auf höchstem Niveau: Mit APG|SGA wird Ihre Kampagne Teil des"
-                " alpinen Wintererlebnisses – an Liften, Pisten und Hotspots. Nutzen Sie das"
-                " hochwertige Umfeld der Schweizer Alpen für Ihren Markenauftritt.\n\nErreichen Sie"
-                " Ihre Zielgruppe in der Saison 2025/26 dort, wo Emotionen entstehen:"
-                " https://lnkd.in/dpzy98be"
+                "Herzlichen Glückwunsch an die APG|SGA AG zum Erhalt des Fair-ON-Pay-Zertifikats!"
+                " Die Auszeichnung würdigt das Engagement für faire und transparente"
+                " Lohnstrukturen – ein wichtiger Schritt zu mehr Gleichstellung und sozialer"
+                " Gerechtigkeit.\n\nMehr dazu: https://lnkd.in/dYpT9qgn"
             ),
-            reactions=37,
-            analysis="Werbliche Sprache ohne konkrete Geschichte oder emotionalen Hook",
+            reactions=6,
+            comments=0,
+            reposts=2,
+            analysis="Wichtiges Thema, aber zu formal und ohne persönlichen Touch",
         ),
     ]
 
@@ -353,4 +413,3 @@ def build_post_examples() -> Dict[str, List[PostExample]]:
 
 
 POST_EXAMPLES = build_post_examples()
-

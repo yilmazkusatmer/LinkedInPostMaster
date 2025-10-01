@@ -97,7 +97,7 @@ def render_historical_posts_tab() -> None:
     st.subheader("📚 Historische Post-Datenbank")
     st.markdown(
         "Die Optimierungen basieren auf **74 erfolgreichen LinkedIn Posts** "
-        "mit messbaren Performance-Daten."
+        "mit messbaren Performance-Daten. **(Datenbestand bis 28.09.2025)**"
     )
     
     posts = load_historical_posts()
@@ -129,7 +129,13 @@ def render_historical_posts_tab() -> None:
     with col1:
         sort_by = st.selectbox(
             "Sortieren nach:",
-            ["Reactions (höchste zuerst)", "Reactions (niedrigste zuerst)", "Chronologisch"],
+            [
+                "Engagement Score (höchste zuerst)",
+                "Engagement Score (niedrigste zuerst)",
+                "Reactions (höchste zuerst)",
+                "Reactions (niedrigste zuerst)",
+                "Chronologisch",
+            ],
         )
     with col2:
         min_reactions = st.number_input(
@@ -139,9 +145,21 @@ def render_historical_posts_tab() -> None:
             value=0,
         )
     
+    # Helper function to calculate engagement score
+    def calc_engagement_score(post: Dict[str, Any]) -> int:
+        metrics = post.get("metrics", {})
+        reactions = metrics.get("reactions_total", 0)
+        comments = metrics.get("comments_count", 0) or 0
+        reposts = metrics.get("reposts_count", 0) or 0
+        return reactions + (comments * 2) + (reposts * 3)
+    
     # Sort posts
     sorted_posts = posts.copy()
-    if sort_by == "Reactions (höchste zuerst)":
+    if sort_by == "Engagement Score (höchste zuerst)":
+        sorted_posts.sort(key=calc_engagement_score, reverse=True)
+    elif sort_by == "Engagement Score (niedrigste zuerst)":
+        sorted_posts.sort(key=calc_engagement_score)
+    elif sort_by == "Reactions (höchste zuerst)":
         sorted_posts.sort(
             key=lambda x: x.get("metrics", {}).get("reactions_total", 0),
             reverse=True,
@@ -167,8 +185,8 @@ def render_historical_posts_tab() -> None:
         reposts = metrics.get("reposts_count", 0) or 0
         author = post.get("posted_at", "Unbekannt")
         
-        # Calculate engagement score
-        engagement_score = reactions + (comments * 2) + (reposts * 3)
+        # Calculate engagement score using the same formula
+        engagement_score = calc_engagement_score(post)
         
         with st.expander(
             f"**#{idx} | {author}** | 👍 {reactions} | 💬 {comments} | 🔄 {reposts} | Score: {engagement_score}",
@@ -207,7 +225,7 @@ def main() -> None:
     st.markdown("**KI-gestützte LinkedIn Post-Optimierung mit Model-Evaluation**")
     
     # Create tabs for navigation
-    tab_optimizer, tab_database = st.tabs(["🚀 Post Optimieren", "📚 Post-Datenbank"])
+    tab_optimizer, tab_database = st.tabs(["🚀 Post Optimieren", "📚 Historische Post-Datenbank"])
 
     with st.sidebar:
         st.subheader("OpenAI API Konfiguration")
