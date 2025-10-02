@@ -71,6 +71,7 @@ def render_optimization_panel(
                 height=200,
                 disabled=True,
                 label_visibility="collapsed",
+                key=f"{debug_key_prefix}_raw_response_{model_name}",
             )
         with st.expander("Verwendeter Prompt"):
             st.text_area(
@@ -79,6 +80,7 @@ def render_optimization_panel(
                 height=200,
                 disabled=True,
                 label_visibility="collapsed",
+                key=f"{debug_key_prefix}_prompt_{model_name}",
             )
 
 
@@ -134,5 +136,6 @@ def render_judge_result(judge_result: JudgeResult, debug_key: str) -> None:
                 height=200,
                 disabled=True,
                 label_visibility="collapsed",
+                key=f"{debug_key}_raw_judge_response",
             )
 
